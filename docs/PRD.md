@@ -344,7 +344,7 @@ Answers from the product owner (2026-10-13), with guidance on how each one affec
 ## 13. Next steps
 
 1. Confirm with MVD the exact guest-verification combinations (§12.7), and with dev the A2Z entry URLs (§12.8) and MAX alert fields (§12.4). Agree which languages come after Spanish (§12.5).
-2. Prototype 2: a full-color, branded build that fixes the §10 issues and P0 requirements, especially links and accessibility semantics. Search stays out of scope.
+2. Prototype 2: a full-color, branded build, chosen from the three directions in the [Creative Brief](Creative-Brief.md), that fixes the §10 issues and P0 requirements, especially links and accessibility semantics. Search stays out of scope.
 3. Run the tree test on the §7 taxonomy alongside Prototype 2.
 4. Run usability round 1, then update this PRD with findings and set metric targets.
 
