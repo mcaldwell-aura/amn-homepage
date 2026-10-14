@@ -1,4 +1,4 @@
-# direction-b
+# baseline
 
 Unpacked, human-readable source for `AZMVDNow-responsive-prototype.html`.
 
@@ -51,7 +51,7 @@ sibling files. From the repo root:
 npx http-server . -p 8756
 ```
 
-then open `http://localhost:8756/direction-b/index.html`.
+then open `http://localhost:8756/baseline/index.html`.
 
 Verified side-by-side against the original bundled file at desktop (1400px)
 and mobile (375px) widths — layout, fonts, icons, the nav hover dropdowns,
