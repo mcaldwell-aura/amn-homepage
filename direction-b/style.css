@@ -976,9 +976,9 @@
 }
 
 /* === Component styles === */
-html, body { margin: 0; padding: 0; background: #f7f7f7; }
+html, body { margin: 0; padding: 0; background: var(--color-page-bg); }
   * { -webkit-font-smoothing: antialiased; }
-  input::placeholder { color: #dcdcdc; opacity: 1; }
+  input::placeholder { color: var(--color-input-placeholder); opacity: 1; }
   body { top: 0 !important; }
   .skiptranslate { display: none !important; }
   html.translated-ltr, html.translated-rtl { margin-top: 0 !important; }
@@ -993,7 +993,7 @@ html, body { margin: 0; padding: 0; background: #f7f7f7; }
     #guestTileGrid { grid-template-columns: repeat(4, minmax(160px, 1fr)) !important; }
   }
   @media (max-width: 1220px) {
-    #benefitGrid { grid-template-columns: repeat(2, minmax(250px, 300px)) !important; column-gap: clamp(40px, 10vw, 120px) !important; }
+    #benefitGrid { grid-template-columns: repeat(2, minmax(250px, 300px)) !important; }
   }
   @media (max-width: 1100px) {
     #heroTileGrid { grid-template-columns: repeat(3, minmax(160px, 1fr)) !important; }
@@ -1049,8 +1049,53 @@ html, body { margin: 0; padding: 0; background: #f7f7f7; }
   .alert-toggle-short { display: none; }
   #alertList[hidden] { display: none !important; }
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-  a { color: #1C3E61; }
-  a:hover { color: #2D6D67; }
+  a { color: var(--color-text-primary); }
+  a:hover { color: var(--color-primary-hover); }
   :focus { outline: none; }
-  :focus-visible { outline: 2px solid #B25E1C; outline-offset: 3px; border-radius: 8px; }
+  :focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: var(--focus-ring-offset); border-radius: 8px; }
   input:focus-visible, select:focus-visible { outline-offset: 1px; }
+
+  /* === Components — State of Arizona. Values live in styles/tokens.css. === */
+
+  /* Header bar. Focus rings inside it flip to white-on-dark so they stay visible. */
+  .az-header { background: var(--color-header-bg); box-shadow: var(--shadow-sm); height: var(--header-height); padding: 0 var(--header-padding-x); justify-content: space-between; }
+  /* Dark surfaces (header, hero, Guest Services, footer): white focus ring, section color as the gap. */
+  .az-header, .surface-dark { --color-focus-ring: var(--color-focus-ring-inverse); --color-focus-gap: var(--color-focus-gap-inverse); }
+
+  /* Buttons — exactly two styles (primary, secondary), two sizes (md default, sm). */
+  .btn { display: inline-flex; flex-direction: row; align-items: center; justify-content: center; gap: var(--btn-gap); box-sizing: border-box; min-height: var(--btn-height-md); min-width: var(--btn-min-width-md); padding: var(--btn-padding-md); border: var(--btn-border-width) solid transparent; border-radius: var(--btn-radius); box-shadow: var(--btn-shadow); font: inherit; text-decoration: none; cursor: pointer; transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast); }
+  .btn--sm { min-height: var(--btn-height-sm); min-width: var(--btn-min-width-sm); padding: var(--btn-padding-sm); }
+  .btn--primary, .btn--primary:hover { color: var(--btn-primary-ink); }
+  .btn--primary { background: var(--btn-primary-bg); }
+  .btn--primary:hover { background: var(--btn-primary-bg-hover); }
+  .btn--primary:active { background: var(--btn-primary-bg-pressed); }
+  .btn--secondary { background: var(--btn-secondary-bg); border-color: var(--btn-secondary-border); color: var(--btn-secondary-ink); }
+  .btn--secondary:hover { background: var(--btn-secondary-bg-hover); border-color: var(--btn-secondary-ink-hover); color: var(--btn-secondary-ink-hover); }
+  .btn--secondary:active { background: var(--btn-secondary-bg-pressed); border-color: var(--btn-secondary-ink-pressed); color: var(--btn-secondary-ink-pressed); }
+  .btn:disabled, .btn[aria-disabled="true"] { background: var(--btn-disabled-bg); border-color: transparent; color: var(--btn-disabled-ink); box-shadow: none; cursor: not-allowed; }
+  .btn:focus-visible { border-radius: var(--btn-radius); box-shadow: 0 0 0 var(--focus-ring-offset) var(--color-focus-gap), var(--btn-shadow); }
+
+  /* Cards — one family for tiles, help cards, benefits, letter steps, Travel ID promo. */
+  .card { background: var(--card-bg); border: var(--card-border); border-radius: var(--card-radius); box-shadow: var(--card-shadow); box-sizing: border-box; }
+  .card--padded { padding: var(--card-padding); }
+  .card--link { cursor: pointer; text-decoration: none; color: var(--color-text-primary); transition: border-color var(--transition-slow), box-shadow var(--transition-slow); }
+  .card--link:hover { border-color: var(--card-border-color-hover); box-shadow: var(--card-shadow-hover); color: var(--color-text-primary); }
+  .card--link:focus-visible { border-radius: var(--card-radius); box-shadow: 0 0 0 var(--focus-ring-offset) var(--color-focus-gap), var(--card-shadow); }
+
+
+  /* Footer — main area + bottom bar. */
+  .az-footer { background: var(--footer-bg); color: var(--color-footer-ink); display: flex; flex-direction: column; }
+  .az-footer__main { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--footer-gap); padding: var(--footer-padding-top) var(--footer-padding-x) var(--footer-padding-bottom); box-sizing: border-box; }
+  .az-footer__bar { background: var(--footer-bar-bg); display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--footer-bar-row-gap) var(--footer-gap); padding: var(--footer-bar-padding-y) var(--footer-padding-x); box-sizing: border-box; }
+  .az-footer__links { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 0 var(--footer-link-gap); min-width: 0; }
+  .az-footer__links a, .az-footer__links a:hover { color: var(--color-footer-ink); }
+  .az-footer__links a { display: inline-flex; align-items: center; min-height: var(--target-min); }
+  @media (max-width: 767px) {
+    .az-footer__links { flex-direction: column; align-items: flex-start; }
+  }
+
+  /* Hero photo — scrim + image; the inline background-color stays as the load/fail fallback. */
+  .az-hero { background-image: linear-gradient(var(--overlay-hero-photo), var(--overlay-hero-photo)), var(--hero-image); background-size: cover; background-position: var(--hero-image-position); background-repeat: no-repeat; }
+  @media (max-width: 767px) {
+    .az-hero { background-image: linear-gradient(var(--overlay-hero-photo), var(--overlay-hero-photo)), var(--hero-image-mobile); background-position: var(--hero-image-position-mobile); }
+  }

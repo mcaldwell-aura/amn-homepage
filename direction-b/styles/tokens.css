@@ -1,0 +1,437 @@
+/*
+ * Direction B — first color/type pass.
+ *
+ * This pass only changes token VALUES here, plus the minimal wiring in
+ * index.html/style.css/script.js needed to make those values visible
+ * (pointing existing color/font-family declarations at these tokens
+ * instead of literal values — no layout, spacing, radius, or shadow
+ * change beyond repointing the color references those shadows use).
+ * See docs/PRD.md §12.2: this round is required to "remove the
+ * grayscale filter and overlay, and apply the AZ MVD Now brand
+ * palette, type, icons, and imagery" — the two grayscale filters in
+ * index.html were removed for exactly that reason, otherwise no color
+ * change here would ever be visible.
+ *
+ * Palette source: State of Arizona design system (Figma), brand
+ * palette export, 2026-10-15. Role-to-shade mapping per that file:
+ *   50 disabled · 100 hover/light · 200 focus/light ·
+ *   300 default/border · 400 hover/dark · 500 focus/dark · 600 surface.
+ * Buttons use shade 400 as their default fill (confirmed: 400 also
+ * clears 4.5:1 for white button text on both copper and turquoise —
+ * see the contrast report).
+ */
+
+/* Fonts — Direction B: Lexend (headlines) / Archivo (body), Arial
+ * fallback. Loaded from Google Fonts. @import must be the first rule
+ * in the stylesheet (CSS forbids nesting it inside :root), which is
+ * the one non-token-value change needed to load them. */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-family-heading: 'Lexend', Arial, sans-serif;
+  --font-family-body: 'Archivo', Arial, sans-serif;
+  /* No separate footer font this round — Direction B specifies two
+     typefaces total, so the old Open Sans footer one-off folds into
+     --font-family-body. The now-unused Inter/Roboto/Open Sans
+     @font-face rules and their woff2 files are left in style.css and
+     assets/fonts/ for now (dead weight, not visual risk) — flagging
+     as a cleanup candidate for a later pass. */
+
+  /* ============================================================
+   * Palette — raw brand colors, from Figma. Do not use these
+   * directly in components; use the role tokens below instead.
+   * ============================================================ */
+  --turquoise-50: #D7EBE9;  /* from-figma: disabled */
+  --turquoise-100: #A1D0CC; /* from-figma: hover/light */
+  --turquoise-200: #6CB4AF; /* from-figma: focus/light */
+  --turquoise-300: #369992; /* from-figma: default/border */
+  --turquoise-400: #257976; /* from-figma: hover/dark */
+  --turquoise-500: #135959; /* from-figma: focus/dark */
+  --turquoise-600: #02393D; /* from-figma: surface */
+
+  --copper-50: #F5E2D2;  /* from-figma: disabled */
+  --copper-100: #E7BB97; /* from-figma: hover/light */
+  --copper-200: #DA935B; /* from-figma: focus/light */
+  --copper-300: #CC6C20; /* from-figma: default/border */
+  --copper-400: #9F5419; /* from-figma: hover/dark */
+  --copper-500: #713C12; /* from-figma: focus/dark */
+  --copper-600: #44240B; /* from-figma: surface */
+
+  --magenta-50: #E8D8E2;  /* from-figma: disabled — not used this pass (no role calls for Setting Sun Magenta yet) */
+  --magenta-100: #C9A3BB; /* from-figma: hover/light */
+  --magenta-200: #A96F94; /* from-figma: focus/light */
+  --magenta-300: #8A3A6D; /* from-figma: default/border */
+  --magenta-400: #6B2D55; /* from-figma: hover/dark */
+  --magenta-500: #4D203C; /* from-figma: focus/dark */
+  --magenta-600: #2E1324; /* from-figma: surface */
+
+  --sage-50: #E8F0E5;  /* from-figma: disabled */
+  --sage-100: #C9DBC2; /* from-figma: hover/light */
+  --sage-200: #ABC79E; /* from-figma: focus/light */
+  --sage-300: #8CB37B; /* from-figma: default/border */
+  --sage-400: #6D8A60; /* from-figma: hover/dark */
+  --sage-500: #4E6344; /* from-figma: focus/dark */
+  --sage-600: #2F3B29; /* from-figma: surface */
+
+  --pine-50: #CCDDD4;  /* from-figma: disabled — Pine Green, not used this pass */
+  --pine-100: #88B09B; /* from-figma: hover/light */
+  --pine-200: #448261; /* from-figma: focus/light */
+  --pine-300: #005528; /* from-figma: default/border */
+  --pine-400: #00421F; /* from-figma: hover/dark */
+  --pine-500: #002F16; /* from-figma: focus/dark */
+  --pine-600: #001C0D; /* from-figma: surface */
+
+  --sand-50: #FBF6ED;  /* from-figma: disabled — Warm Sand, not used this pass */
+  --sand-100: #F6EBD4; /* from-figma: hover/light */
+  --sand-200: #F0DFBC; /* from-figma: focus/light */
+  --sand-300: #EBD4A3; /* from-figma: default/border */
+  --sand-400: #B7A57F; /* from-figma: hover/dark */
+  --sand-500: #82765A; /* from-figma: focus/dark */
+  --sand-600: #4E4736; /* from-figma: surface */
+
+  --neutral-50: #F7F7F7;  /* from-figma: disabled */
+  --neutral-100: #D4D4D6; /* from-figma: hover/light */
+  --neutral-200: #B6B7B9; /* from-figma: focus/light */
+  --neutral-300: #8D8F95; /* from-figma: default/border */
+  --neutral-400: #6A6D74; /* from-figma: hover/dark */
+  --neutral-500: #464A53; /* from-figma: focus/dark */
+  --neutral-600: #14151A; /* from-figma: surface */
+
+  /* Negative — status color for errors/alerts. Only the 300 shade has
+     been supplied so far; add the rest of the ramp when it arrives. */
+  --negative-300: #D92D20; /* from-figma: negative 300 */
+
+  /* RGB triplets — only for the shades actually alpha-blended below */
+  --turquoise-300-rgb: 54, 153, 146;
+  --sage-300-rgb: 140, 179, 123;
+  --neutral-500-rgb: 70, 74, 83;
+  --neutral-600-rgb: 20, 21, 26;
+
+  /* ============================================================
+   * Role tokens — point these at palette shades. Components should
+   * only ever reference role tokens, never --turquoise-300 etc.
+   * directly, so the palette can be retuned without hunting through
+   * component files.
+   * ============================================================ */
+
+  /* Primary — Open Skies Turquoise. The page's dominant brand color:
+     header/toast/step-badge surfaces, the guest-services/footer
+     gradient, the 14 service-tile icons, and any hover/active text
+     ink (nav, links, benefit titles, mobile tabs). */
+  --color-primary: var(--turquoise-300);        /* default/border — tile icons, brand accents that don't hold text */
+  --color-primary-surface: var(--turquoise-400); /* text-safe: surfaces holding white text (header, toast, step badges, gradient) */
+  --color-primary-hover: var(--turquoise-400);   /* hover/dark — hover-state text ink and tile-circle hover fill (same shade, two uses) */
+
+  /* CTA — Sunrise Copper. Buttons no longer read this (they use the
+     --btn-* family below, Turquoise by default), so --color-cta is
+     unused for now. (The alert triangle moved to --color-icon-alert.) */
+  --color-cta: var(--copper-400);      /* buttons use 400 as default fill per the Figma state mapping; verified ≥4.5:1 with white text */
+  --color-icon-alert: var(--negative-300); /* from-figma: negative 300 #D92D20 — alert-strip triangle; 4.83:1 on the white strip. Was copper-300 via --color-cta-icon (now removed). */
+  --color-icon-accent: var(--copper-300); /* from-figma: Sunrise Copper 300 #CC6C20 — Travel ID star badge; 3.66:1 on the white promo card */
+  --color-focus-ring: var(--btn-400); /* from-figma (brief): Turquoise 400 outline on every :focus-visible, after a white gap (--color-focus-gap). Was copper-300. */
+
+  /* Support — Desert Sage, decoration only (never a filled surface
+     under white text, per the brief's contrast caveat). Covers
+     underlines, panel borders, and icon fills that previously used
+     the old teal accent. */
+  --color-support: var(--sage-300);        /* light decorative accents: underline color, dropdown/mobile-nav borders */
+  --color-support-strong: var(--sage-400); /* darker decorative accents: benefit-row icons, language-picker chevron */
+  /* Contact-card border+ink is real, readable text (not pure
+     decoration), so it needs its own AA-checked shade rather than
+     --color-support-strong: sage-400 measures 3.85:1 on white (fails
+     4.5:1), sage-500 measures 6.58:1 (passes) — see contrast report. */
+  --color-support-text: var(--sage-500);
+  --color-support-text-hover: var(--sage-600);
+  --overlay-support-tint: rgba(var(--sage-300-rgb), 0.12); /* contact-card hover background wash */
+
+  /* Text — navy/near-black per the brief; Neutral 600 per your
+     instruction. One secondary/muted tier kept distinct from primary
+     text for hierarchy (previously navy vs. slate served this same
+     purpose) — flag if you want every text node on exactly one shade
+     instead. */
+  --color-text-primary: var(--neutral-600);   /* headings, links, labels, tile text — "Neutral 600 for text" */
+  --color-text-secondary: var(--neutral-500); /* secondary/muted body copy (was slate #5a5f73) */
+  --color-divider: var(--neutral-300);        /* hairline divider under "Got a Letter from MVD?" heading */
+  --color-input-placeholder: var(--neutral-100);
+
+  /* Surfaces */
+  --color-page-bg: var(--neutral-50); /* exact match to the old #f7f7f7 */
+  /* Guest-services/footer gradient. First pass ran 300->400->500,
+     i.e. started at the non-text-safe default/border shade — normal
+     body text near the top of that gradient measured 3.43:1 against
+     white (fails 4.5:1; only large headings cleared the 3:1 bar
+     there). Shifted the whole ramp one step darker (400->500->600) so
+     every stop is text-safe; re-verified below. */
+  --gradient-primary-surface: linear-gradient(160deg, var(--turquoise-400) 0%, var(--turquoise-500) 50%, var(--turquoise-600) 100%);
+  /* These two sections had off-palette one-off grays before (#393939,
+     #868686) with no real brand role — kept as plain dark/mid neutral
+     surfaces for now, preserving the existing contrast relationships.
+     Distinct, branded per-section backgrounds (brief §5: "each
+     section gets a visually distinct background") are a later pass,
+     not a token-value swap. */
+  --bg-section-promo: var(--gradient-primary-surface); /* Travel ID promo band — same T400→T500→T600 gradient as Guest Services (was neutral-600 black, briefly T300). No text sits on it; white card edge is 5.15:1 at the lightest stop. */
+  /* Hero background (was #868686EB). First pass used neutral-400,
+     which composited to 4.42:1 with the white subtitle text (needs
+     4.5:1) — see the contrast report. Bumped one shade darker to
+     neutral-500 to clear AA; re-verified below. */
+  --overlay-hero-bg: rgba(var(--neutral-500-rgb), 0.92); /* now the fallback color while the photo loads (or if it fails) */
+
+  /* Hero photo — Havasu Falls, behind "Arizona MVD Services Without
+     Leaving Home". Phones get an 800px copy (118 KB) instead of the
+     1500px original (388 KB).
+     NOTE: a relative url() inside a custom property resolves against
+     the stylesheet that USES the var() (style.css, in direction-b/),
+     not this file — so these paths are written from direction-b/, not
+     from styles/. "../assets/…" here 404s. */
+  --hero-image: url("assets/images/hero-havasu-falls.jpg");         /* provisional: supplied photo, 1500×1007 */
+  --hero-image-mobile: url("assets/images/hero-havasu-falls-800.jpg"); /* derived: 800px resize of the same photo */
+  /* Uniform Neutral 600 scrim. 62% keeps white text ≥ 5.10:1 even over
+     the pure-white waterfall spray (58% is the AA floor at 4.46:1);
+     sky 6.79:1, pool 7.80:1, canyon walls 9.61:1. */
+  --overlay-hero-photo: rgba(var(--neutral-600-rgb), 0.62);             /* derived */
+  /* Waterfall sits right of center; on narrow screens "cover" crops the
+     sides, so bias the crop right to keep it in frame. */
+  --hero-image-position: 50% 50%;           /* derived: desktop shows the whole width anyway */
+  --hero-image-position-mobile: 64% 50%;    /* derived: keeps the falls in frame at 320–767px */
+
+  /* ===== Typography — sizes (fluid clamps kept as authored) ===== */
+  --font-size-hero: clamp(32px, 3vw, 56px);
+  --font-size-h2: clamp(26px, 1.95vw, 36px);
+  --font-size-subtitle: clamp(18px, 1.35vw, 24px);
+  --font-size-lg: 18px;
+  --font-size-base: 16px;
+  --font-size-sm: 15px;
+  --font-size-xs: 14px;
+
+  /* ===== Typography — weights ===== */
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ===== Typography — line heights =====
+   * REVIEW: 140% (contact-card text) and 145% (everything else body
+   * copy) are one step apart and may be an unintentional drift — see
+   * inconsistency notes.
+   */
+  --line-height-tight: 110%;    /* hero h1 */
+  --line-height-heading: 115%;  /* all section h2s */
+  --line-height-snug: 130%;     /* step-card h3s */
+  --line-height-relaxed: 135%;  /* benefit title spans */
+  --line-height-loose: 140%;    /* contact-card detail text — REVIEW, see above */
+  --line-height-body: 145%;     /* pervasive body copy */
+  --line-height-tile-label: 24px; /* REVIEW: tile label spans use an absolute px line-height (150% of 16px) instead of a percentage like every other text style — candidate to become 150% for consistency */
+
+  /* ===== Spacing — fluid (page/section layout, kept as authored) =====
+   * These are bespoke per section rather than a generic scale, so
+   * they're named by role, not by size.
+   */
+  /* ===== Column grid — State of Arizona (Unity Design System) =====
+   * Desktop: 12 columns × 78px, 24px gutters, 1200px content area,
+   * outside margins take whatever is left. Mobile (< 768px): 4 fluid
+   * columns, 16px gutters, 32px outside margins.
+   * The spec's mobile table also says "content area 1200px fixed" —
+   * read as a copy slip (mobile columns are fluid), so not applied.
+   */
+  --grid-content-max: 1200px;      /* from-figma: desktop content area */
+  --grid-columns: 12;              /* from-figma: desktop column count (mobile override below) */
+  --grid-column-width: 78px;       /* from-figma: desktop column (12 × 78 + 11 × 24 = 1200) */
+  --grid-gutter: 24px;             /* from-figma: desktop gutter (mobile override below) */
+  --grid-margin-min: 32px;         /* from-figma: mobile outside margin; derived as the floor at every width */
+  /* Outside margin: centers the 1200px content area, never below 32px.
+     Uses 100% (the section's width) rather than 100vw so the scrollbar
+     doesn't skew it — every consumer is a full-width section. 120px at
+     1440, 32px at 375, 680px at 2560. Replaces the old 1320px/20px
+     clamp and the header's separate 16px curve. */
+  --grid-margin: max(var(--grid-margin-min), calc((100% - var(--grid-content-max)) / 2)); /* derived */
+  --space-fluid-section-y-hero: clamp(40px, 6vw, 80px);  /* REVIEW: hero section vertical padding uses a 6vw rate vs 5vw everywhere else — confirm intentional */
+  --space-fluid-section-y: clamp(40px, 5vw, 60px);       /* vertical padding: promo, benefits, letter-steps, guest-services, contact */
+  --space-fluid-footer-y: clamp(24px, 3vw, 30px);
+  --space-fluid-hero-gap: clamp(28px, 4vw, 56px);        /* hero title column <-> tile column gap */
+  --space-fluid-row-gap-lg: clamp(28px, 3vw, 48px);      /* travel-promo row gap */
+  --space-fluid-footer-gap: clamp(20px, 3vw, 48px);
+  --space-fluid-header-gap: clamp(6px, 0.8vw, 24px);
+  --space-fluid-navtabs-gap: clamp(1px, calc(1.2vw - 9.5px), 18px);      /* REVIEW: hand-tuned calc(), not derived from a scale */
+  --space-fluid-navtab-padding-x: clamp(2px, calc(1.6vw - 12px), 22px); /* REVIEW: hand-tuned calc(), not derived from a scale */
+  --space-fluid-mobilenav-padding: clamp(20px, 4vw, 32px);
+  --space-fluid-footerlinks-gap: clamp(16px, 2.5vw, 56px);
+  --space-fluid-footerlinks-padding-x: clamp(12px, 2vw, 40px);
+
+  /* ===== Spacing — static scale =====
+   * Faithful capture of every distinct fixed px value found. Several of
+   * these sit 2px apart from a neighbor in a way that reads as
+   * accidental rather than deliberate (see inconsistency notes) — kept
+   * distinct here so no value is silently merged without sign-off.
+   */
+  --space-50: 4px;
+  --space-75: 5px;   /* REVIEW: nav tab icon/text gap — only consumer of this exact value, 1px from --space-50 */
+  --space-100: 6px;
+  --space-125: 8px;
+  --space-150: 10px;
+  --space-175: 12px;
+  --space-200: 14px;
+  --space-225: 16px;
+  --space-250: 18px;
+  --space-275: 20px;
+  --space-300: 22px;
+  --space-325: 24px;
+  --space-350: 27px;  /* REVIEW: CTA button horizontal padding (12px 27px) — not a multiple of 4 or 8, only consumer */
+  --space-400: 32px;
+  --space-450: 40px;
+  --space-475: 44px;
+  --space-500: 48px;
+  --space-550: 56px;
+  --space-800: 100px;
+  --space-825: 117px; /* REVIEW: header bar min-height — oddly specific, only consumer */
+  --space-850: 120px;
+
+  /* ===== Radius ===== */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-circle: 50%;
+  --radius-pill: 999px;
+
+  /* ===== Shadows =====
+   * Geometry unchanged from the prior proposal — only the color
+   * references were repointed from the old navy/teal overlays to the
+   * new primary/support tokens so these stay meaningful.
+   * REVIEW: --shadow-tile-hover-primary and --shadow-tile-hover-neutral
+   * are identical geometry (0 10px 24px) with different color bases
+   * (primary-tinted vs neutral black) — hero-section tiles use the
+   * primary-tinted version, guest-section tiles use the neutral
+   * version. Likely unintentional drift between two copy-pasted
+   * blocks; still unresolved from the last audit.
+   */
+  --shadow-button: 0 1px 4px rgba(0, 0, 0, 0.25);
+  --shadow-tile: 0 4px 4px rgba(0, 0, 0, 0.25);
+  --shadow-tile-hover-primary: 0 10px 24px rgba(var(--turquoise-300-rgb), 0.35); /* hero-section tiles */
+  --shadow-tile-hover-neutral: 0 10px 24px rgba(0, 0, 0, 0.35);                   /* guest-section tiles — REVIEW, see above */
+  --shadow-panel: 0 14px 30px rgba(var(--turquoise-300-rgb), 0.35);               /* dropdown menu / mobile nav panel */
+  --shadow-card-hover: 0 8px 18px rgba(0, 0, 0, 0.12); /* "Need Help" contact cards */
+  --shadow-glow-primary: 0 0 0 6px rgba(var(--turquoise-300-rgb), 0.18); /* icon-circle hover glow ring */
+
+  /* ============================================================
+   * Components — header, buttons, icons, cards. State of Arizona
+   * design system (Figma). Tags: from-figma = taken from the file ·
+   * derived = computed from Figma values or WCAG needs ·
+   * provisional = placeholder until a real value is supplied.
+   * ============================================================ */
+  --color-surface: #FFFFFF; /* from-figma: surface/light neutral surface */
+  --shadow-sm: 0 1px 2px 0 rgba(20, 21, 26, 0.06), 0 1px 3px 0 rgba(20, 21, 26, 0.10); /* from-figma */
+  --shadow-md: 0 4px 8px -2px rgba(20, 21, 26, 0.12), 0 2px 4px -2px rgba(20, 21, 26, 0.08); /* derived: hover lift, same ink as shadow-sm */
+  /* Radius: the brief's radius token name/value was left blank, so this
+     reuses the existing 8px. Every button and card reads it — change
+     this one line when the Figma value arrives. */
+  --radius-component: var(--radius-sm); /* provisional */
+  --target-min: 44px; /* derived: minimum touch target (CLAUDE.md / WCAG 2.5.5) */
+
+  /* Icons — service-tile, benefit, help-card and promo icons keep their
+     original turquoise/sage styling (icon pass reverted). Only the
+     mobile-menu chevrons use this, for contrast on white (8.88:1; the
+     old sage was 2.37:1). */
+  --color-icon: var(--neutral-500);      /* from-figma: icon/default */
+
+  /* Focus ring — one ring for buttons, cards, and every other control:
+     a white gap, then a 2px outline in the button family's 400 shade. */
+  --color-focus-gap: var(--color-surface); /* from-figma (brief): white gap */
+  --focus-ring-width: 2px;   /* derived */
+  --focus-ring-offset: 2px;  /* derived: the gap's width */
+  /* On dark sections (header, hero, Guest Services, footer) the white gap would
+     merge with white cards, and Turquoise 400 nearly vanishes (1.37:1 on
+     hero gray, 1.05:1 on the guest gradient), so those surfaces flip to a
+     white ring with the section color showing through as the gap. */
+  --color-focus-ring-inverse: var(--color-surface); /* derived: 7.05:1 on hero gray, ≥5.15:1 on the guest gradient, 12.69:1 on the header */
+  --color-focus-gap-inverse: transparent;           /* derived */
+
+  /* Header */
+  --header-height: 72px;                     /* from-figma */
+  --color-header-bg: var(--turquoise-600);   /* from-figma: primary/dark */
+  --color-header-ink: var(--color-surface);  /* derived: white, 12.69:1 on header bg */
+  --color-header-icon: var(--turquoise-100); /* derived: dropdown chevrons + open-tab underline, 7.50:1 on header bg */
+  /* Follows the page grid: 120px at 1440 (matches the Figma header),
+     32px on phones, so the logo lines up with the content edge. */
+  --header-padding-x: var(--grid-margin); /* derived */
+  --header-logo-height: 48px;   /* derived: fits the 72px bar with 12px clearance */
+  --header-menu-overlap: 8px;   /* derived: dropdown tucks 8px under the bar so the hover path stays unbroken (was 24px on the 117px bar) */
+
+  /* Buttons — color family. The whole button system reads only these
+     five lines; to switch to Copper, change "turquoise" to "copper"
+     in all five. */
+  --btn-50: var(--turquoise-50);
+  --btn-100: var(--turquoise-100);
+  --btn-400: var(--turquoise-400);
+  --btn-500: var(--turquoise-500);
+  --btn-600: var(--turquoise-600);
+
+  --btn-height-md: 56px;      /* from-figma: medium (default) */
+  --btn-min-width-md: 80px;   /* from-figma */
+  --btn-padding-md: 12px 16px; /* from-figma */
+  --btn-height-sm: 48px;      /* from-figma: small — tight spaces only (header) */
+  --btn-min-width-sm: 64px;   /* from-figma */
+  --btn-padding-sm: 8px 12px; /* from-figma */
+  --btn-gap: 8px;             /* from-figma */
+  --btn-radius: var(--radius-component); /* from-figma: radius token (value provisional, see above) */
+  --btn-shadow: var(--shadow-sm);        /* from-figma */
+  --btn-border-width: 1px;    /* from-figma: secondary border; primary carries a transparent one so both are the same size */
+
+  --btn-primary-bg: var(--btn-400);          /* from-figma */
+  --btn-primary-ink: var(--color-surface);   /* from-figma: white, 5.15:1 */
+  --btn-primary-bg-hover: var(--btn-500);    /* from-figma: 8.07:1 */
+  --btn-primary-bg-pressed: var(--btn-600);  /* from-figma: 12.69:1 */
+
+  --btn-secondary-bg: var(--color-surface);  /* from-figma */
+  --btn-secondary-border: var(--btn-400);    /* from-figma */
+  --btn-secondary-ink: var(--btn-400);       /* from-figma: 5.15:1 on white */
+  --btn-secondary-bg-hover: var(--btn-50);   /* derived */
+  --btn-secondary-ink-hover: var(--btn-500); /* derived: 400 on 50 is 4.16:1 (fails AA); 500 is 6.52:1 */
+  --btn-secondary-bg-pressed: var(--btn-100); /* derived */
+  --btn-secondary-ink-pressed: var(--btn-600); /* derived: 400 on 100 is 3.05:1 (fails AA); 600 is 7.50:1 */
+
+  --btn-disabled-bg: var(--neutral-100);  /* provisional */
+  --btn-disabled-ink: var(--neutral-400); /* provisional: 3.50:1 — disabled controls are exempt from WCAG 1.4.3 */
+
+  /* Cards — no reference/card-panel.png yet, so the brief's fallback. */
+  --card-bg: var(--color-surface);           /* provisional */
+  --card-border: 1px solid var(--neutral-100); /* provisional: 1.48:1 on white — decorative; shadow + content carry the edge */
+  --card-radius: var(--radius-component);    /* provisional */
+  --card-shadow: var(--shadow-sm);           /* provisional */
+  --card-shadow-hover: var(--shadow-md);     /* derived */
+  --card-border-color-hover: var(--turquoise-400); /* from-figma (brief): clickable-tile hover, 5.15:1 on white */
+  --card-padding: 24px;                      /* derived: matches the existing step-card padding */
+
+  /* Footer — State of Arizona footer component. Main area: logo +
+     "All Rights Reserved." Bottom bar: links + language picker (where
+     Figma has social icons). Copy and element order unchanged. */
+  --footer-bg: var(--turquoise-600);        /* from-figma: primary/dark #02393D */
+  --color-footer-ink: var(--color-surface); /* derived: white, 12.69:1 on footer bg, 8.07:1 on bar */
+  /* Padding: Figma is 96 / 120 / 48 / 120 at 1440. Top was reduced to
+     match the bottom (48) at your request — 96 left too much empty space
+     above the logo here, since this footer has far less content than the
+     Figma one. Phones get 32 / 32 / 32 / 32 at 375 (sides follow the grid margin). */
+  --footer-padding-top: var(--footer-padding-bottom);                /* derived: was 96px (from-figma); now 48px at 1440, 32px at 375 */
+  --footer-padding-bottom: clamp(32px, calc(1.5vw + 26.4px), 48px);  /* derived (48px from-figma) */
+  --footer-padding-x: var(--grid-margin);                            /* derived: page grid margin (120px at 1440 = from-figma) */
+  --footer-gap: 32px;                       /* from-figma */
+  --footer-bar-bg: var(--turquoise-500);    /* provisional: Figma shows a lighter band but no swatch; T500 is the closest palette shade */
+  --footer-bar-padding-y: 20px;             /* provisional: read from the frame, not the inspector */
+  --footer-bar-row-gap: 16px;               /* derived: space between links and picker when the bar wraps */
+  --footer-link-gap: 16px;                  /* provisional: read from the frame */
+
+  /* Section backgrounds — benefits and letter steps were both white and
+     adjacent; benefits steps to Neutral 50 so every adjacent pair differs. */
+  --color-section-benefits: var(--neutral-50); /* derived */
+
+  /* ===== Motion ===== */
+  --transition-fast: 140ms ease;
+  --transition-medium: 160ms ease;
+  --transition-slow: 180ms ease;
+}
+
+/* Mobile column grid — under 768px: 4 fluid columns, 16px gutters.
+ * The 32px outside margin is already the --grid-margin floor. */
+@media (max-width: 767px) {
+  :root {
+    --grid-columns: 4;   /* from-figma */
+    --grid-gutter: 16px; /* from-figma */
+  }
+}
