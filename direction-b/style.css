@@ -1020,21 +1020,20 @@ html, body { margin: 0; padding: 0; background: var(--color-page-bg); }
     #helpCardGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   }
   @media (max-width: 760px) {
-    #guestTileGrid { grid-template-columns: repeat(2, minmax(160px, 1fr)) !important; }
+    #guestTileGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
     #guestTileGrid[data-collapsed="1"] > *:nth-child(n+5) { display: none !important; }
     #guestMore { display: block !important; }
   }
   @media (max-width: 590px) {
-    #heroTileGrid { grid-template-columns: repeat(2, minmax(160px, 1fr)) !important; }
+    #heroTileGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   }
   @media (max-width: 410px) {
-    #heroTileGrid, #guestTileGrid { grid-template-columns: minmax(160px, 1fr) !important; }
-    #heroTileGrid > *, #guestTileGrid > * { flex-direction: row !important; height: 76px !important; padding: 0 18px !important; gap: 14px !important; align-items: center !important; justify-content: flex-start !important; }
-    #heroTileGrid > * > span, #guestTileGrid > * > span { text-align: left !important; max-width: none !important; width: auto !important; min-width: 0 !important; white-space: normal !important; }
-    #heroTileGrid > * > span br, #guestTileGrid > * > span br { display: none !important; }
+    /* Two tiles per row on small phones: tighter side padding and no extra tracking so long words fit. */
+    #heroTileGrid > *, #guestTileGrid > * { padding-left: var(--tile-padding-x-compact) !important; padding-right: var(--tile-padding-x-compact) !important; }
+    #heroTileGrid > * > span, #guestTileGrid > * > span { letter-spacing: 0 !important; max-width: none !important; }
   }
   @media (max-width: 620px) {
-    #benefitGrid { grid-template-columns: minmax(0, 300px) !important; }
+    #benefitGrid { grid-template-columns: minmax(0, 1fr) !important; }
   }
   @media (max-width: 420px) {
     .signin-full { display: none !important; }
@@ -1098,4 +1097,10 @@ html, body { margin: 0; padding: 0; background: var(--color-page-bg); }
   .az-hero { background-image: linear-gradient(var(--overlay-hero-photo), var(--overlay-hero-photo)), var(--hero-image); background-size: cover; background-position: var(--hero-image-position); background-repeat: no-repeat; }
   @media (max-width: 767px) {
     .az-hero { background-image: linear-gradient(var(--overlay-hero-photo), var(--overlay-hero-photo)), var(--hero-image-mobile); background-position: var(--hero-image-position-mobile); }
+  }
+
+  /* Mobile: Sign Up and Sign In to View Your Letter span the content width like the cards around them. */
+  @media (max-width: 767px) {
+    .cta-stack { align-self: stretch; }
+    .btn--block-mobile { align-self: stretch; width: 100%; flex: 1 1 100%; }
   }

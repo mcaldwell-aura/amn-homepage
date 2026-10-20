@@ -398,6 +398,7 @@
   --card-shadow-hover: var(--shadow-md);     /* derived */
   --card-border-color-hover: var(--turquoise-400); /* from-figma (brief): clickable-tile hover, 5.15:1 on white */
   --card-padding: 24px;                      /* derived: matches the existing step-card padding */
+  --tile-padding-x-compact: 8px; /* derived: service-tile side padding at 410px and below, so two tiles per row fit long single words ("Appointment", "Registration") down to 320px. Normal is 16px. */
 
   /* Footer — State of Arizona footer component. Main area: logo +
      "All Rights Reserved." Bottom bar: links + language picker (where

@@ -162,10 +162,10 @@ that shows expand state.
 
 | Card | Variant | Notes |
 |---|---|---|
-| Hero service tiles (6) | `.card--link` | whole tile is the existing `<a>` |
-| Guest Services tiles (8) | `.card--link` | same |
+| Hero service tiles (6) | `.card--link` | whole tile is the existing `<a>`. Mobile: 2 per row (was 1 per row at 410px and below) |
+| Guest Services tiles (8) | `.card--link` | same. Mobile: 2 per row (was 1 per row at 410px and below); still collapses to 4 + "View All" |
 | Need Help cards (6) | `.card--link` | border was 2px sage; now the card family |
-| Benefit items (4) | `.card--padded` | not clickable; equal-height row |
+| Benefit items (4) | `.card--padded` | not clickable; equal-height row. **Hover interaction removed** at your request (no icon scale or glow, no title color change) |
 | Letter step cards (4) | `.card--padded` | calm, neutral, always visible |
 | Travel ID promo | `.card--padded` | content sits in a white card with dark text on the turquoise band |
 
@@ -236,6 +236,39 @@ maps onto its layout, with element order unchanged:
 - **Contrast:** white on `#02393D` is 12.69:1; white on the T500 bar is 8.07:1.
 - **Focus:** the footer stays `.surface-dark`, so it keeps the white inverse focus ring.
 - **Font size:** unchanged at 14px, because the State of Arizona type scale was reverted.
+
+### Mobile service tiles — 2 per row
+
+The hero and Guest Services tiles now stay **two per row, read left to right**
+on phones. The old 410px rule turned them into a one-per-row horizontal list;
+it was removed.
+
+- **Column sizing:** both 2-up rules use `minmax(0, 1fr)` instead of
+  `minmax(160px, 1fr)`, since two 160px minimums would overflow below about
+  376px.
+- **Small phones (410px and below):** tiles use `--tile-padding-x-compact`
+  (8px side padding instead of 16px, derived) and no extra letter-spacing.
+  This lets long single words like "Appointment" and "Registration" fit in
+  the 120px tiles at 320px. Font size is unchanged.
+- **Checked:** at 320 and 375 the hero shows 3 rows of 2 and Guest Services
+  2 rows of 2 before "View All", with no clipped labels and no horizontal
+  scroll. Desktop is unchanged (hero 3 across, Guest Services 4 across).
+
+### Mobile full-width buttons
+
+Under 768px, **Sign Up** and **Sign In to View Your Letter** stretch to the
+content width, so they line up with the cards around them. The rule is
+`.btn--block-mobile`; the Sign Up container (`.cta-stack`) also stretches,
+since it was shrink-wrapped and centered. On desktop both keep their natural
+width (91px and 223px).
+
+To make the edges match, the benefit cards on phones now also use the full
+content width. Under 620px they were capped at 300px, which left them about
+6px inside the button on each side; the cap is now `minmax(0, 1fr)`.
+
+At 375 everything shares one edge: benefit cards, Sign Up, step cards, Sign In
+to View Your Letter, and the court-order note, all 311px (32 to 343). At 320
+they're all 256px. No horizontal scroll.
 
 ### Touch targets (≥ 44×44)
 
