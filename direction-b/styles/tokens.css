@@ -250,8 +250,12 @@
   --space-fluid-row-gap-lg: clamp(28px, 3vw, 48px);      /* travel-promo row gap */
   --space-fluid-footer-gap: clamp(20px, 3vw, 48px);
   --space-fluid-header-gap: clamp(6px, 0.8vw, 24px);
-  --space-fluid-navtabs-gap: clamp(1px, calc(1.2vw - 9.5px), 18px);      /* REVIEW: hand-tuned calc(), not derived from a scale */
-  --space-fluid-navtab-padding-x: clamp(2px, calc(1.6vw - 12px), 22px); /* REVIEW: hand-tuned calc(), not derived from a scale */
+  /* Nav tab spacing scales with the viewport up to 1440, then holds: the
+     header content stops at the 1200px grid, so spacing that kept growing
+     wrapped the last tab out of the bar on wide screens. */
+  --space-fluid-navtabs-vw: min(1vw, 14.4px); /* derived: 1vw, frozen at 1440 */
+  --space-fluid-navtabs-gap: clamp(1px, calc(1.2 * var(--space-fluid-navtabs-vw) - 9.5px), 18px);      /* REVIEW: hand-tuned calc(), not derived from a scale */
+  --space-fluid-navtab-padding-x: clamp(2px, calc(1.6 * var(--space-fluid-navtabs-vw) - 12px), 22px); /* REVIEW: hand-tuned calc(), not derived from a scale */
   --space-fluid-mobilenav-padding: clamp(20px, 4vw, 32px);
   --space-fluid-footerlinks-gap: clamp(16px, 2.5vw, 56px);
   --space-fluid-footerlinks-padding-x: clamp(12px, 2vw, 40px);
